@@ -1,0 +1,5 @@
+#Enable ICMP through the Windows firewal
+New-NetFirewallRule –DisplayName "Allow ICMPv4-In" –Protocol ICMPv4
+
+#Turn on IP forwarding, then REBOOT
+Set-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters -Name IpEnableRouter -Value 1
