@@ -1,2 +1,13 @@
 #Get ER Circuit Table
 Get-AzExpressRouteCircuitRouteTable -DevicePath Primary -ExpressRouteCircuitName AHITSL-ExpressRoute-001 -PeeringType AzurePrivatePeering -ResourceGroupName SDI-Non-Production-Network-rg 
+
+
+# Required Variables
+    $RG = "SDI-Non-Production-Network-rg"
+    $Name = "AHITSL-ExpressRoute-001"
+
+# ARP table for Azure private peering - Primary path
+    Get-AzExpressRouteCircuitARPTable -ResourceGroupName $RG -ExpressRouteCircuitName $Name -PeeringType AzurePrivatePeering -DevicePath Primary
+
+#Get ER Circuit Table
+    Get-AzExpressRouteCircuitRouteTable -DevicePath Primary -ExpressRouteCircuitName $Name -PeeringType AzurePrivatePeering -ResourceGroupName $RG
