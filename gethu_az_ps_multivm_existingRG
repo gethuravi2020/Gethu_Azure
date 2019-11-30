@@ -1,0 +1,43 @@
+#VM_Provision
+$rg = "agw-rg"
+$vnet   = Get-AzVirtualNetwork -ResourceGroupName $rg -Name agw-vNet
+$subnet = Get-AzVirtualNetworkSubnetConfig -VirtualNetwork $vnet -Name vm-network
+$cred = Get-Credential
+for ($i=1; $i -le 2; $i++)
+{
+  $nic = New-AzNetworkInterface `
+    -Name myNic$i `
+    -ResourceGroupName $rg `
+    -Location EastUS `
+    -SubnetId $subnet.Id
+  $vm = New-AzVMConfig `
+    -VMName myVM$i `
+    -VMSize Standard_DS2_v2
+  Set-AzVMOperatingSystem `
+    -VM $vm `
+    -Windows `
+    -ComputerName myVM$i `
+    -Credential $cred
+  Set-AzVMSourceImage `
+    -VM $vm `
+    -PublisherName MicrosoftWindowsServer `
+    -Offer WindowsServer `
+    -Skus 2016-Datacenter `
+    -Version latest
+  Add-AzVMNetworkInterface `
+    -VM $vm `
+    -Id $nic.Id
+  Set-AzVMBootDiagnostic `
+    -VM $vm `
+    -Disable
+  New-AzVM -ResourceGroupName $rg -Location EastUS -VM $vm
+  Set-AzVMExtension `
+    -ResourceGroupName $rg `
+    -ExtensionName IIS `
+    -VMName myVM$i `
+    -Publisher Microsoft.Compute `
+    -ExtensionType CustomScriptExtension `
+    -TypeHandlerVersion 1.4 `
+    -SettingString '{"commandToExecute":"powershell Add-WindowsFeature Web-Server; powershell Add-Content -Path \"C:\\inetpub\\wwwroot\\Default.htm\" -Value $($env:computername)"}' `
+    -Location EastUS
+}
